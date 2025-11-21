@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { requireAuth } = require("../middleware/auth"); 
+const { requireAuth } = require("../middleware/auth"); // adjust path if needed
 const recipeController = require("../controllers/recipeController");
 
 router.get("/", recipeController.listRecipes);
