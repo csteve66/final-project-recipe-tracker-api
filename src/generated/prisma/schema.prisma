@@ -48,6 +48,7 @@ model Recipe {
   servings    Int?
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
+  avg_rating  Float    @default(0)
 
   // Relations
   user              User               @relation(fields: [user_id], references: [userid])
@@ -116,9 +117,13 @@ model CollectionItem {
 }
 
 model Review {
-  review_id Int @id @default(autoincrement())
-  user_id   Int
-  recipe_id Int
+  review_id  Int      @id @default(autoincrement())
+  user_id    Int
+  recipe_id  Int
+  rating     Int
+  comment    String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   user   User   @relation(fields: [user_id], references: [userid])
   recipe Recipe @relation(fields: [recipe_id], references: [recipe_id])

@@ -181,19 +181,25 @@ async function main() {
 
 
   //Reviews
-  await prisma.review.create({
-    data: {
-      user_id: user2.userid,
-      recipe_id: pancakeRecipe.recipe_id
-    }
-  });
+//Reviews
+await prisma.review.create({
+  data: {
+    user_id: user2.userid,
+    recipe_id: pancakeRecipe.recipe_id,
+    rating: 5,
+    comment: "Loved these pancakes"
+  }
+});
 
-  await prisma.review.create({
-    data: {
-      user_id: user1.userid,
-      recipe_id: pastaRecipe.recipe_id
-    }
-  });
+await prisma.review.create({
+  data: {
+    user_id: user1.userid,
+    recipe_id: pastaRecipe.recipe_id,
+    rating: 4,
+    comment: "Tasty pasta"
+  }
+});
+
 
   console.log("Seeding complete!");
 }
