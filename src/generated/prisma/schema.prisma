@@ -15,21 +15,21 @@ datasource db {
 }
 
 model User {
-  userid       Int           @id @default(autoincrement())
-  username     String        @unique
-  email        String        @unique
+  userid        Int      @id @default(autoincrement())
+  username      String   @unique
+  email         String   @unique
   password_hash String
-  role         String
-  date_joined  DateTime      @default(now())
+  role          String
+  date_joined   DateTime @default(now())
 
   // Relations
-  recipes      Recipe[]
-  collections  Collection[]
-  reviews      Review[]
+  recipes     Recipe[]
+  collections Collection[]
+  reviews     Review[]
 }
 
 model Ingredient {
-  ingredient_id Int       @id @default(autoincrement())
+  ingredient_id Int     @id @default(autoincrement())
   name          String
   unit          String?
 
@@ -38,24 +38,24 @@ model Ingredient {
 }
 
 model Recipe {
-  recipe_id   Int        @id @default(autoincrement())
+  recipe_id   Int      @id @default(autoincrement())
   user_id     Int
   title       String
   description String?
-  is_public   Boolean    @default(false)
-  prep_time   Int?       // in minutes
-  cook_time   Int?       // in minutes
+  is_public   Boolean  @default(false)
+  prep_time   Int? // in minutes
+  cook_time   Int? // in minutes
   servings    Int?
-  created_at  DateTime   @default(now())
-  updated_at  DateTime   @updatedAt
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
 
   // Relations
-  user            User            @relation(fields: [user_id], references: [userid])
-  steps           Step[]
+  user              User               @relation(fields: [user_id], references: [userid])
+  steps             Step[]
   recipeIngredients RecipeIngredient[]
-  recipeTags      RecipeTag[]
-  reviews         Review[]
-  collectionItems CollectionItem[]
+  recipeTags        RecipeTag[]
+  reviews           Review[]
+  collectionItems   CollectionItem[]
 }
 
 model RecipeIngredient {
@@ -70,10 +70,10 @@ model RecipeIngredient {
 }
 
 model Step {
-  step_id      Int     @id @default(autoincrement())
-  recipe_id    Int
-  step_number  Int
-  instruction  String
+  step_id     Int    @id @default(autoincrement())
+  recipe_id   Int
+  step_number Int
+  instruction String
 
   // Relations
   recipe Recipe @relation(fields: [recipe_id], references: [recipe_id])
@@ -101,8 +101,8 @@ model Collection {
   user_id       Int
   name          String
 
-  user     User             @relation(fields: [user_id], references: [userid])
-  items    CollectionItem[]
+  user  User             @relation(fields: [user_id], references: [userid])
+  items CollectionItem[]
 }
 
 model CollectionItem {
