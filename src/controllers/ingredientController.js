@@ -79,3 +79,5 @@ module.exports = {
   updateIngredient,
   deleteIngredient,
 };
+
+export default ingredientController;
