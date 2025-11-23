@@ -389,3 +389,5 @@ module.exports = {
   replaceSteps,
   replaceIngredients,
 };
+
+export default recipeController;
