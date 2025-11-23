@@ -1,7 +1,8 @@
-import express from "express";
-import { requireAuth } from "../middleware/auth.js";
-import recipeController from "../controllers/recipeController.js";
 
+import express from "express";
+import { authenticate } from "../middleware/auth.js";
+import { authorizeRoles } from "../middleware/authorizeRoles.js";
+import recipeController from "../controllers/recipeController.js";
 
 import {
   validateRecipeId,
@@ -20,61 +21,61 @@ router.get("/", recipeController.listRecipes);
 
 router.get(
   "/:id",
-  validateRecipeId,              
+  validateRecipeId,
   recipeController.getRecipe
 );
 
 
 router.post(
   "/",
-  requireAuth,
-  validateCreateRecipe,           
+  authenticate,
+  authorizeRoles("ADMIN", "CREATOR"),
+  validateCreateRecipe,
   recipeController.createRecipe
 );
 
 
 router.put(
   "/:id",
-  requireAuth,
+  authenticate,
   validateRecipeId,
-  validateUpdateRecipe,          
+  validateUpdateRecipe,
   recipeController.updateRecipe
 );
 
 
 router.delete(
   "/:id",
-  requireAuth,
+  authenticate,
   validateRecipeId,
   recipeController.deleteRecipe
 );
 
-
 router.put(
   "/:id/visibility",
-  requireAuth,
+  authenticate,
   validateRecipeId,
-  validateUpdateRecipeVisibility, 
+  validateUpdateRecipeVisibility,
   recipeController.setVisibility
 );
 
 
 router.post(
   "/:id/steps",
-  requireAuth,
+  authenticate,
   validateRecipeId,
-  validateCreateStepsForRecipe,  
+  validateCreateStepsForRecipe,
   recipeController.replaceSteps
 );
 
-
 router.post(
   "/:id/ingredients",
-  requireAuth,
+  authenticate,
   validateRecipeId,
-  validateCreateIngredientsForRecipe, // validates body.ingredients[*]
+  validateCreateIngredientsForRecipe,
   recipeController.replaceIngredients
 );
 
 export default router;
+
 
