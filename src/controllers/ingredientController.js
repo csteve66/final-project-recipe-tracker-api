@@ -1,78 +1,82 @@
-const prisma = require("../config/db");
+import ingredientService from "../services/ingredientService.js";
 
 
-async function searchIngredients(req, res) {
-  const q = (req.query.q || "").toString().trim();
-
-  if (!q) {
-    const all = await prisma.ingredient.findMany({
-      take: 50,
-      orderBy: { name: "asc" },
-    });
-    return res.json(all);
-  }
-
-  const items = await prisma.ingredient.findMany({
-    where: { name: { contains: q, mode: "insensitive" } },
-    take: 50,
-    orderBy: { name: "asc" },
-  });
-
-  res.json(items);
-}
-
-
-async function getIngredient(req, res) {
-  const id = req.params.id;
-  const ing = await prisma.ingredient.findUnique({ where: { id } });
-  if (!ing) return res.status(404).json({ error: "Not found" });
-  res.json(ing);
-}
-
-
-async function createIngredient(req, res) {
-  const name = req.body && req.body.name;
-  if (!name) return res.status(400).json({ error: "name is required" });
-
+export async function searchIngredients(req, res) {
   try {
-    const created = await prisma.ingredient.create({
-      data: { name: String(name).trim().toLowerCase() },
+    const items = await ingredientService.searchIngredientsService({
+      q: req.query.q,
     });
-    res.status(201).json(created);
-  } catch (e) {
-    return res.status(409).json({ error: "Ingredient already exists" });
+    return res.json(items);
+  } catch (err) {
+    console.error("Error searching ingredients:", err);
+    return res
+      .status(err.status || 500)
+      .json({ error: err.message || "Server error" });
   }
 }
 
-
-async function updateIngredient(req, res) {
-  const name = req.body && req.body.name;
-  if (!name) return res.status(400).json({ error: "name is required" });
-
+export async function getIngredient(req, res) {
   try {
-    const updated = await prisma.ingredient.update({
-      where: { id: req.params.id },
-      data: { name: String(name).trim().toLowerCase() },
+    const ing = await ingredientService.getIngredientByIdService({
+      ingredientId: req.params.id,   
     });
-    res.json(updated);
-  } catch (e) {
-    if (e.code === "P2025") return res.status(404).json({ error: "Not found" });
-    if (e.code === "P2002") return res.status(409).json({ error: "Duplicate name" });
-    throw e;
+    return res.json(ing);
+  } catch (err) {
+    console.error("Error getting ingredient:", err);
+    return res
+      .status(err.status || 500)
+      .json({ error: err.message || "Server error" });
   }
 }
 
-async function deleteIngredient(req, res) {
+
+export async function createIngredient(req, res) {
   try {
-    await prisma.ingredient.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  } catch (e) {
-    if (e.code === "P2025") return res.status(404).json({ error: "Not found" });
-    throw e;
+    const created = await ingredientService.createIngredientService({
+      name: req.body?.name,
+      unit: req.body?.unit,  
+    });
+    return res.status(201).json(created);
+  } catch (err) {
+    console.error("Error creating ingredient:", err);
+    return res
+      .status(err.status || 500)
+      .json({ error: err.message || "Server error" });
   }
 }
 
-module.exports = {
+export async function updateIngredient(req, res) {
+  try {
+    const updated = await ingredientService.updateIngredientService({
+      ingredientId: req.params.id,   
+      name: req.body?.name,
+      unit: req.body?.unit,
+    });
+    return res.json(updated);
+  } catch (err) {
+    console.error("Error updating ingredient:", err);
+    return res
+      .status(err.status || 500)
+      .json({ error: err.message || "Server error" });
+  }
+}
+
+
+export async function deleteIngredient(req, res) {
+  try {
+    await ingredientService.deleteIngredientService({
+      ingredientId: req.params.id,   
+    });
+    return res.status(204).send();
+  } catch (err) {
+    console.error("Error deleting ingredient:", err);
+    return res
+      .status(err.status || 500)
+      .json({ error: err.message || "Server error" });
+  }
+}
+
+const ingredientController = {
   searchIngredients,
   getIngredient,
   createIngredient,
