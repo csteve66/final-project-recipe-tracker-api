@@ -1,5 +1,6 @@
 const prisma = require("../config/db");
 
+
 function isAdmin(req) {
   return req.user && req.user.role === "ADMIN";
 }
@@ -84,7 +85,7 @@ async function getRecipe(req, res) {
     !recipe.isPublic &&
     !(req.user && (isAdmin(req) || isOwner(req, recipe.ownerId)))
   ) {
-
+   
     return notFound(res);
   }
 
@@ -133,13 +134,12 @@ async function createRecipe(req, res) {
     return badReq(res, "title is required");
   }
 
-
   const stepCreates = steps.map((s) => ({
     order: Number(s.order),
     text: String(s.text || ""),
   }));
 
-  
+
   const ingredientCreates = [];
   for (const i of ingredients) {
     let ingredientId = i.ingredientId;
@@ -165,7 +165,7 @@ async function createRecipe(req, res) {
     });
   }
 
-  
+
   const tagCreates = [];
   for (const t of tags) {
     const name = String(t).trim().toLowerCase();
@@ -389,6 +389,3 @@ module.exports = {
   replaceSteps,
   replaceIngredients,
 };
-        
-
-
