@@ -199,7 +199,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\14073\\OneDrive\\Desktop\\final-project-recipe-tracker-api\\src\\generated\\prisma",
+      "value": "C:\\Users\\chase\\Documents\\GitHub\\final-project-recipe-tracker-api\\src\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -213,11 +213,11 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\14073\\OneDrive\\Desktop\\final-project-recipe-tracker-api\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\chase\\Documents\\GitHub\\final-project-recipe-tracker-api\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": "../../../.env",
+    "rootEnvPath": null,
     "schemaEnvPath": "../../../.env"
   },
   "relativePath": "../../../prisma",
