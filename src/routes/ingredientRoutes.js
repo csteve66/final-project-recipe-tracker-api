@@ -1,5 +1,6 @@
 import express from "express";
-import { requireAuth, requireRole } from "../middleware/auth.js";
+import { authenticate } from "../middleware/auth.js";
+import { authorizeRoles } from '../middleware/authorizeRoles.js';
 import ingredientController from "../controllers/ingredientController.js";
 
 import {
@@ -28,13 +29,8 @@ router.get(
 
 router.post(
   "/",
-  requireAuth,                           
-  (req, res, next) => {                  
-    if (req.user?.role === "CREATOR" || req.user?.role === "ADMIN") {
-      return next();
-    }
-    return res.status(403).json({ error: "Forbidden" });
-  },
+  authenticate,                           
+  authorizeRoles('CREATOR', 'ADMIN'),
   validateCreateIngredient,              
   ingredientController.createIngredient
 );
@@ -42,8 +38,8 @@ router.post(
 
 router.put(
   "/:id",
-  requireAuth,
-  requireRole("ADMIN"),
+  authenticate,
+  authorizeRoles('ADMIN'),
   validateIngredientId,
   validateUpdateIngredient,
   ingredientController.updateIngredient
@@ -52,8 +48,8 @@ router.put(
 
 router.delete(
   "/:id",
-  requireAuth,
-  requireRole("ADMIN"),
+  authenticate,
+  authorizeRoles('ADMIN'),
   validateIngredientId,
   ingredientController.deleteIngredient
 );
