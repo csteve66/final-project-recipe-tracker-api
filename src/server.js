@@ -2,6 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 
+import ingredientRoutes from "./routes/ingredientRoutes.js";
+import recipeRoutes from "./routes/recipeRoutes.js";
+
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(cors());
@@ -9,6 +13,9 @@ app.use(cors());
 app.use(morgan('tiny'));
 
 app.use(express.json());
+
+app.use("/ingredients", ingredientRoutes);
+app.use("/recipes", recipeRoutes);
 
 app.use((req, res, next) => {
   const err = new Error('Not Found');
