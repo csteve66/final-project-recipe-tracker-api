@@ -21,12 +21,14 @@ async function searchIngredients(req, res) {
   res.json(items);
 }
 
+
 async function getIngredient(req, res) {
   const id = req.params.id;
   const ing = await prisma.ingredient.findUnique({ where: { id } });
   if (!ing) return res.status(404).json({ error: "Not found" });
   res.json(ing);
 }
+
 
 async function createIngredient(req, res) {
   const name = req.body && req.body.name;
@@ -41,6 +43,7 @@ async function createIngredient(req, res) {
     return res.status(409).json({ error: "Ingredient already exists" });
   }
 }
+
 
 async function updateIngredient(req, res) {
   const name = req.body && req.body.name;
@@ -58,7 +61,6 @@ async function updateIngredient(req, res) {
     throw e;
   }
 }
-
 
 async function deleteIngredient(req, res) {
   try {
