@@ -4,6 +4,8 @@ import morgan from 'morgan';
 
 import ingredientRoutes from "./routes/ingredientRoutes.js";
 import recipeRoutes from "./routes/recipeRoutes.js";
+import authRoutes from './routes/authRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 
 const app = express();
@@ -16,6 +18,8 @@ app.use(express.json());
 
 app.use("/ingredients", ingredientRoutes);
 app.use("/recipes", recipeRoutes);
+app.use('/auth', authRoutes);
+app.use('/users', userRoutes);
 
 app.use((req, res, next) => {
   const err = new Error('Not Found');
