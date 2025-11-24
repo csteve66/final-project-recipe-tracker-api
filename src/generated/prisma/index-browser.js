@@ -20,12 +20,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 6.12.0
- * Query Engine version: 8047c96bbd92db98a2abc7c9323ce77c02c89dbc
+ * Prisma Client JS version: 6.18.0
+ * Query Engine version: 34b5a692b7bd79939a9a2c3ef97d816e749cda2f
  */
 Prisma.prismaVersion = {
-  client: "6.12.0",
-  engine: "8047c96bbd92db98a2abc7c9323ce77c02c89dbc"
+  client: "6.18.0",
+  engine: "34b5a692b7bd79939a9a2c3ef97d816e749cda2f"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -145,7 +145,8 @@ exports.Prisma.RecipeScalarFieldEnum = {
   cook_time: 'cook_time',
   servings: 'servings',
   created_at: 'created_at',
-  updated_at: 'updated_at'
+  updated_at: 'updated_at',
+  avg_rating: 'avg_rating'
 };
 
 exports.Prisma.RecipeIngredientScalarFieldEnum = {
@@ -184,7 +185,11 @@ exports.Prisma.CollectionItemScalarFieldEnum = {
 exports.Prisma.ReviewScalarFieldEnum = {
   review_id: 'review_id',
   user_id: 'user_id',
-  recipe_id: 'recipe_id'
+  recipe_id: 'recipe_id',
+  rating: 'rating',
+  comment: 'comment',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
 };
 
 exports.Prisma.SortOrder = {

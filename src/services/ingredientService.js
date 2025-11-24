@@ -1,4 +1,4 @@
-import ingredientRepository from "../repositories/ingredientRepository.js";
+import ingredientRepository from "../repositories/ingredientRepo.js";
 
 function httpError(status, message) {
   const err = new Error(message);

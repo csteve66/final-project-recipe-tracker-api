@@ -2,7 +2,6 @@ import express from "express";
 import { authenticate } from "../middleware/auth.js";
 import { authorizeRoles } from '../middleware/authorizeRoles.js';
 import { authorizeOwnership } from '../middleware/authorizeOwnership.js';
-import { getRecipeById } from '../services/recipeService.js';
 import recipeController from "../controllers/recipeController.js";
 
 
@@ -16,6 +15,7 @@ import {
 } from "../middleware/recipeValidators.js";
 
 const router = express.Router();
+const requireAuth = [authenticate, authorizeRoles("ADMIN", "CREATOR")];
 
 
 router.get("/", recipeController.listRecipes);
@@ -40,7 +40,6 @@ router.post(
 router.put(
   "/:id",
   authenticate,
-  authorizeOwnership(getRecipeById),
   validateRecipeId,
   validateUpdateRecipe,          
   recipeController.updateRecipe
@@ -50,7 +49,6 @@ router.put(
 router.delete(
   "/:id",
   authenticate,
-  authorizeOwnership(getRecipeById),
   validateRecipeId,
   recipeController.deleteRecipe
 );
@@ -59,7 +57,6 @@ router.delete(
 router.put(
   "/:id/visibility",
   authenticate,
-  authorizeOwnership(getRecipeById),
   validateRecipeId,
   validateUpdateRecipeVisibility, 
   recipeController.setVisibility
@@ -84,4 +81,5 @@ router.post(
 );
 
 export default router;
+
 

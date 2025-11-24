@@ -1,4 +1,4 @@
-import recipeRepository from "../repositories/recipeRepository.js";
+import recipeRepository from "../repositories/recipeRepo.js";
 import ingredientService from "./ingredientService.js";
 
 function httpError(status, message) {

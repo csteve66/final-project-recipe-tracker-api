@@ -1,6 +1,5 @@
 import { body, oneOf } from 'express-validator';
-import { handleValidationErrors } from './handleValidationErrors.js';
-
+import handleValidationErrors from './handleValidationErrors.js';
 export const validateUser = [
     body('email')
         .exists({ values: 'falsy' })
@@ -74,4 +73,28 @@ export const validateRoleUpdate = [
         .isIn(['USER', 'CREATOR', 'ADMIN'])
         .withMessage('Role must be either USER, CREATOR, or ADMIN'),
     handleValidationErrors
+];
+
+export const validateLogin = [
+  body("username")
+    .optional()
+    .isString()
+    .withMessage("Invalid username"),
+
+  body("email")
+    .optional()
+    .isEmail()
+    .withMessage("Invalid email"),
+
+  body("password")
+    .notEmpty()
+    .withMessage("Password is required"),
+
+  body()
+    .custom((value, { req }) => {
+      if (!req.body.username && !req.body.email) {
+        throw new Error("Either email or username is required");
+      }
+      return true;
+    })
 ];

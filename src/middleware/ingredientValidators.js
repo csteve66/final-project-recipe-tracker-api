@@ -1,5 +1,5 @@
 import { param, query, body } from 'express-validator';
-import { handleValidationErrors } from './handleValidationErrors.js';
+import handleValidationErrors from './handleValidationErrors.js';
 
 export const validateIngredientId = [
     param('id')

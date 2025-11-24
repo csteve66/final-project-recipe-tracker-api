@@ -5,13 +5,28 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 
 const {
+  PrismaClientKnownRequestError,
+  PrismaClientUnknownRequestError,
+  PrismaClientRustPanicError,
+  PrismaClientInitializationError,
+  PrismaClientValidationError,
+  getPrismaClient,
+  sqltag,
+  empty,
+  join,
+  raw,
+  skip,
   Decimal,
+  Debug,
   objectEnumValues,
   makeStrictEnum,
+  Extensions,
+  warnOnce,
+  defineDmmfProperty,
   Public,
   getRuntime,
-  skip
-} = require('./runtime/index-browser.js')
+  createParam,
+} = require('./runtime/wasm-engine-edge.js')
 
 
 const Prisma = {}
@@ -20,79 +35,35 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 6.12.0
- * Query Engine version: 8047c96bbd92db98a2abc7c9323ce77c02c89dbc
+ * Prisma Client JS version: 6.18.0
+ * Query Engine version: 34b5a692b7bd79939a9a2c3ef97d816e749cda2f
  */
 Prisma.prismaVersion = {
-  client: "6.12.0",
-  engine: "8047c96bbd92db98a2abc7c9323ce77c02c89dbc"
+  client: "6.18.0",
+  engine: "34b5a692b7bd79939a9a2c3ef97d816e749cda2f"
 }
 
-Prisma.PrismaClientKnownRequestError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientKnownRequestError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)};
-Prisma.PrismaClientUnknownRequestError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientUnknownRequestError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.PrismaClientRustPanicError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientRustPanicError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.PrismaClientInitializationError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientInitializationError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.PrismaClientValidationError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientValidationError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
+Prisma.PrismaClientKnownRequestError = PrismaClientKnownRequestError;
+Prisma.PrismaClientUnknownRequestError = PrismaClientUnknownRequestError
+Prisma.PrismaClientRustPanicError = PrismaClientRustPanicError
+Prisma.PrismaClientInitializationError = PrismaClientInitializationError
+Prisma.PrismaClientValidationError = PrismaClientValidationError
 Prisma.Decimal = Decimal
 
 /**
  * Re-export of sql-template-tag
  */
-Prisma.sql = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`sqltag is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.empty = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`empty is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.join = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`join is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.raw = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`raw is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
+Prisma.sql = sqltag
+Prisma.empty = empty
+Prisma.join = join
+Prisma.raw = raw
 Prisma.validator = Public.validator
 
 /**
 * Extensions
 */
-Prisma.getExtensionContext = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`Extensions.getExtensionContext is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.defineExtension = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`Extensions.defineExtension is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
+Prisma.getExtensionContext = Extensions.getExtensionContext
+Prisma.defineExtension = Extensions.defineExtension
 
 /**
  * Shorthand utilities for JSON filtering
@@ -109,10 +80,11 @@ Prisma.NullTypes = {
 
 
 
+
+
 /**
  * Enums
  */
-
 exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   ReadUncommitted: 'ReadUncommitted',
   ReadCommitted: 'ReadCommitted',
@@ -145,7 +117,8 @@ exports.Prisma.RecipeScalarFieldEnum = {
   cook_time: 'cook_time',
   servings: 'servings',
   created_at: 'created_at',
-  updated_at: 'updated_at'
+  updated_at: 'updated_at',
+  avg_rating: 'avg_rating'
 };
 
 exports.Prisma.RecipeIngredientScalarFieldEnum = {
@@ -184,7 +157,11 @@ exports.Prisma.CollectionItemScalarFieldEnum = {
 exports.Prisma.ReviewScalarFieldEnum = {
   review_id: 'review_id',
   user_id: 'user_id',
-  recipe_id: 'recipe_id'
+  recipe_id: 'recipe_id',
+  rating: 'rating',
+  comment: 'comment',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
 };
 
 exports.Prisma.SortOrder = {
@@ -215,34 +192,82 @@ exports.Prisma.ModelName = {
   CollectionItem: 'CollectionItem',
   Review: 'Review'
 };
-
 /**
- * This is a stub Prisma Client that will error at runtime if called.
+ * Create the Client
  */
-class PrismaClient {
-  constructor() {
-    return new Proxy(this, {
-      get(target, prop) {
-        let message
-        const runtime = getRuntime()
-        if (runtime.isEdge) {
-          message = `PrismaClient is not configured to run in ${runtime.prettyName}. In order to run Prisma Client on edge runtime, either:
-- Use Prisma Accelerate: https://pris.ly/d/accelerate
-- Use Driver Adapters: https://pris.ly/d/driver-adapters
-`;
-        } else {
-          message = 'PrismaClient is unable to run in this browser environment, or has been bundled for the browser (running in `' + runtime.prettyName + '`).'
-        }
-
-        message += `
-If this is unexpected, please open an issue: https://pris.ly/prisma-prisma-bug-report`
-
-        throw new Error(message)
+const config = {
+  "generator": {
+    "name": "client",
+    "provider": {
+      "fromEnvVar": null,
+      "value": "prisma-client-js"
+    },
+    "output": {
+      "value": "/mnt/c/Users/biggs/Downloads/final-project-recipe-tracker-api/src/generated/prisma",
+      "fromEnvVar": null
+    },
+    "config": {
+      "engineType": "library"
+    },
+    "binaryTargets": [
+      {
+        "fromEnvVar": null,
+        "value": "debian-openssl-3.0.x",
+        "native": true
       }
-    })
+    ],
+    "previewFeatures": [],
+    "sourceFilePath": "/mnt/c/Users/biggs/Downloads/final-project-recipe-tracker-api/prisma/schema.prisma",
+    "isCustomOutput": true
+  },
+  "relativeEnvPaths": {
+    "rootEnvPath": null,
+    "schemaEnvPath": "../../../.env"
+  },
+  "relativePath": "../../../prisma",
+  "clientVersion": "6.18.0",
+  "engineVersion": "34b5a692b7bd79939a9a2c3ef97d816e749cda2f",
+  "datasourceNames": [
+    "db"
+  ],
+  "activeProvider": "postgresql",
+  "inlineDatasources": {
+    "db": {
+      "url": {
+        "fromEnvVar": "DATABASE_URL",
+        "value": null
+      }
+    }
+  },
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  userid        Int      @id @default(autoincrement())\n  username      String   @unique\n  email         String   @unique\n  password_hash String\n  role          String\n  date_joined   DateTime @default(now())\n\n  // Relations\n  recipes     Recipe[]\n  collections Collection[]\n  reviews     Review[]\n}\n\nmodel Ingredient {\n  ingredient_id Int     @id @default(autoincrement())\n  name          String\n  unit          String?\n\n  // Relations\n  recipeIngredients RecipeIngredient[]\n}\n\nmodel Recipe {\n  recipe_id   Int      @id @default(autoincrement())\n  user_id     Int\n  title       String\n  description String?\n  is_public   Boolean  @default(false)\n  prep_time   Int? // in minutes\n  cook_time   Int? // in minutes\n  servings    Int?\n  created_at  DateTime @default(now())\n  updated_at  DateTime @updatedAt\n  avg_rating  Float    @default(0)\n\n  // Relations\n  user              User               @relation(fields: [user_id], references: [userid])\n  steps             Step[]\n  recipeIngredients RecipeIngredient[]\n  recipeTags        RecipeTag[]\n  reviews           Review[]\n  collectionItems   CollectionItem[]\n}\n\nmodel RecipeIngredient {\n  recipe_id     Int\n  ingredient_id Int\n\n  // Relations\n  recipe     Recipe     @relation(fields: [recipe_id], references: [recipe_id])\n  ingredient Ingredient @relation(fields: [ingredient_id], references: [ingredient_id])\n\n  @@id([recipe_id, ingredient_id])\n}\n\nmodel Step {\n  step_id     Int    @id @default(autoincrement())\n  recipe_id   Int\n  step_number Int\n  instruction String\n\n  // Relations\n  recipe Recipe @relation(fields: [recipe_id], references: [recipe_id])\n}\n\nmodel Tag {\n  tag_id Int    @id @default(autoincrement())\n  name   String @unique\n\n  recipeTags RecipeTag[]\n}\n\nmodel RecipeTag {\n  recipe_id Int\n  tag_id    Int\n\n  recipe Recipe @relation(fields: [recipe_id], references: [recipe_id])\n  tag    Tag    @relation(fields: [tag_id], references: [tag_id])\n\n  @@id([recipe_id, tag_id])\n}\n\nmodel Collection {\n  collection_id Int    @id @default(autoincrement())\n  user_id       Int\n  name          String\n\n  user  User             @relation(fields: [user_id], references: [userid])\n  items CollectionItem[]\n}\n\nmodel CollectionItem {\n  collection_id Int\n  recipe_id     Int\n\n  collection Collection @relation(fields: [collection_id], references: [collection_id])\n  recipe     Recipe     @relation(fields: [recipe_id], references: [recipe_id])\n\n  @@id([collection_id, recipe_id])\n}\n\nmodel Review {\n  review_id  Int      @id @default(autoincrement())\n  user_id    Int\n  recipe_id  Int\n  rating     Int\n  comment    String?\n  created_at DateTime @default(now())\n  updated_at DateTime @updatedAt\n\n  user   User   @relation(fields: [user_id], references: [userid])\n  recipe Recipe @relation(fields: [recipe_id], references: [recipe_id])\n}\n",
+  "inlineSchemaHash": "bd24ae3dd2d707aacfa00ccbca2c0906d553495327e60821fbcd282d19408603",
+  "copyEngine": true
+}
+config.dirname = '/'
+
+config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"userid\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"username\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"password_hash\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"role\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"date_joined\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"recipes\",\"kind\":\"object\",\"type\":\"Recipe\",\"relationName\":\"RecipeToUser\"},{\"name\":\"collections\",\"kind\":\"object\",\"type\":\"Collection\",\"relationName\":\"CollectionToUser\"},{\"name\":\"reviews\",\"kind\":\"object\",\"type\":\"Review\",\"relationName\":\"ReviewToUser\"}],\"dbName\":null},\"Ingredient\":{\"fields\":[{\"name\":\"ingredient_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"unit\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"recipeIngredients\",\"kind\":\"object\",\"type\":\"RecipeIngredient\",\"relationName\":\"IngredientToRecipeIngredient\"}],\"dbName\":null},\"Recipe\":{\"fields\":[{\"name\":\"recipe_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"user_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"is_public\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"prep_time\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"cook_time\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"servings\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"created_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updated_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"avg_rating\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"RecipeToUser\"},{\"name\":\"steps\",\"kind\":\"object\",\"type\":\"Step\",\"relationName\":\"RecipeToStep\"},{\"name\":\"recipeIngredients\",\"kind\":\"object\",\"type\":\"RecipeIngredient\",\"relationName\":\"RecipeToRecipeIngredient\"},{\"name\":\"recipeTags\",\"kind\":\"object\",\"type\":\"RecipeTag\",\"relationName\":\"RecipeToRecipeTag\"},{\"name\":\"reviews\",\"kind\":\"object\",\"type\":\"Review\",\"relationName\":\"RecipeToReview\"},{\"name\":\"collectionItems\",\"kind\":\"object\",\"type\":\"CollectionItem\",\"relationName\":\"CollectionItemToRecipe\"}],\"dbName\":null},\"RecipeIngredient\":{\"fields\":[{\"name\":\"recipe_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"ingredient_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"recipe\",\"kind\":\"object\",\"type\":\"Recipe\",\"relationName\":\"RecipeToRecipeIngredient\"},{\"name\":\"ingredient\",\"kind\":\"object\",\"type\":\"Ingredient\",\"relationName\":\"IngredientToRecipeIngredient\"}],\"dbName\":null},\"Step\":{\"fields\":[{\"name\":\"step_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"recipe_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"step_number\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"instruction\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"recipe\",\"kind\":\"object\",\"type\":\"Recipe\",\"relationName\":\"RecipeToStep\"}],\"dbName\":null},\"Tag\":{\"fields\":[{\"name\":\"tag_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"recipeTags\",\"kind\":\"object\",\"type\":\"RecipeTag\",\"relationName\":\"RecipeTagToTag\"}],\"dbName\":null},\"RecipeTag\":{\"fields\":[{\"name\":\"recipe_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"tag_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"recipe\",\"kind\":\"object\",\"type\":\"Recipe\",\"relationName\":\"RecipeToRecipeTag\"},{\"name\":\"tag\",\"kind\":\"object\",\"type\":\"Tag\",\"relationName\":\"RecipeTagToTag\"}],\"dbName\":null},\"Collection\":{\"fields\":[{\"name\":\"collection_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"user_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"CollectionToUser\"},{\"name\":\"items\",\"kind\":\"object\",\"type\":\"CollectionItem\",\"relationName\":\"CollectionToCollectionItem\"}],\"dbName\":null},\"CollectionItem\":{\"fields\":[{\"name\":\"collection_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"recipe_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"collection\",\"kind\":\"object\",\"type\":\"Collection\",\"relationName\":\"CollectionToCollectionItem\"},{\"name\":\"recipe\",\"kind\":\"object\",\"type\":\"Recipe\",\"relationName\":\"CollectionItemToRecipe\"}],\"dbName\":null},\"Review\":{\"fields\":[{\"name\":\"review_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"user_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"recipe_id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"rating\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"comment\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"created_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updated_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"ReviewToUser\"},{\"name\":\"recipe\",\"kind\":\"object\",\"type\":\"Recipe\",\"relationName\":\"RecipeToReview\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
+config.engineWasm = {
+  getRuntime: async () => require('./query_engine_bg.js'),
+  getQueryEngineWasmModule: async () => {
+    const loader = (await import('#wasm-engine-loader')).default
+    const engine = (await loader).default
+    return engine
   }
 }
+config.compilerWasm = undefined
 
+config.injectableEdgeEnv = () => ({
+  parsed: {
+    DATABASE_URL: typeof globalThis !== 'undefined' && globalThis['DATABASE_URL'] || typeof process !== 'undefined' && process.env && process.env.DATABASE_URL || undefined
+  }
+})
+
+if (typeof globalThis !== 'undefined' && globalThis['DEBUG'] || typeof process !== 'undefined' && process.env && process.env.DEBUG || undefined) {
+  Debug.enable(typeof globalThis !== 'undefined' && globalThis['DEBUG'] || typeof process !== 'undefined' && process.env && process.env.DEBUG || undefined)
+}
+
+const PrismaClient = getPrismaClient(config)
 exports.PrismaClient = PrismaClient
-
 Object.assign(exports, Prisma)
+
