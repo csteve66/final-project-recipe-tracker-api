@@ -2,8 +2,7 @@ openapi: 3.0.3
 info:
   title: Recipe Tracker API
   version: 1.0.0
-  description: >
-    REST API for managing recipes, ingredients, collections, and reviews.
+  description: REST API for recipes, ingredients, collections, reviews, authentication, and user management.
 
 servers:
   - url: http://localhost:3000
@@ -26,24 +25,44 @@ components:
           example: 1
         username:
           type: string
-          example: "jasmine_biggs"
+          example: jasmine_biggs
         email:
           type: string
-          example: "jb@example.com"
+          format: email
+          example: jb@example.com
         role:
           type: string
           enum: [USER, CREATOR, ADMIN]
 
+    AuthToken:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+    AuthSignupMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          example: New user created with an id of 42
+
     Ingredient:
       type: object
       properties:
-        id:
+        ingredient_id:
           type: integer
-          example: 1
+          example: 12
         name:
           type: string
-          example: "flour"
-      required: [id, name]
+          example: flour
+        unit:
+          type: string
+          nullable: true
+          example: grams
+      required: [ingredient_id, name]
 
     Step:
       type: object
@@ -53,30 +72,43 @@ components:
           example: 1
         text:
           type: string
-          example: "Mix all dry ingredients"
+          example: Mix all dry ingredients
       required: [order, text]
+
+    RecipeIngredient:
+      type: object
+      properties:
+        ingredientId:
+          type: integer
+          example: 12
+        name:
+          type: string
+          example: sugar
+        unit:
+          type: string
+          nullable: true
+          example: grams
+      required: [ingredientId, name]
 
     RecipeSummary:
       type: object
       properties:
         id:
           type: integer
-          example: 1
+          example: 3
         title:
           type: string
-          example: "Fluffy Pancakes"
+          example: Fluffy Pancakes
         isPublic:
           type: boolean
           example: true
-        avgRating:
-          type: number
-          format: float
-          nullable: true
-          example: 4.5
-      required:
-        - id
-        - title
-        - isPublic
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, title, isPublic]
 
     RecipeDetail:
       type: object
@@ -108,32 +140,13 @@ components:
         ingredients:
           type: array
           items:
-            type: object
-            properties:
-              ingredientId:
-                type: integer
-                example: 1
-              name:
-                type: string
-              quantity:
-                type: number
-                example: 200
-              unit:
-                type: string
-                example: "grams"
+            $ref: '#/components/schemas/RecipeIngredient'
         tags:
           type: array
           items:
             type: string
-            example: "breakfast"
-        avgRating:
-          type: number
-          format: float
-          nullable: true
-      required:
-        - id
-        - title
-        - isPublic
+            example: breakfast
+      required: [id, title, isPublic]
 
     Collection:
       type: object
@@ -146,7 +159,7 @@ components:
           example: 4
         name:
           type: string
-          example: "Jasmine's Saved Recipes"
+          example: Jasmine's Saved Recipes
 
     CollectionItem:
       type: object
@@ -158,12 +171,49 @@ components:
           type: integer
           example: 1
         recipe_id:
-          type: string
-          example: "rec_123"
+          type: integer
+          example: 2
         note:
           type: string
           nullable: true
-          example: "Make this again on Sunday"
+          example: Make this again on Sunday
+
+    CollectionItemWithRecipe:
+      allOf:
+        - $ref: '#/components/schemas/CollectionItem'
+        - type: object
+          properties:
+            recipe:
+              type: object
+              description: Basic recipe object returned by Prisma include
+              properties:
+                recipe_id:
+                  type: integer
+                title:
+                  type: string
+                description:
+                  type: string
+                  nullable: true
+                user_id:
+                  type: integer
+                is_public:
+                  type: boolean
+                created_at:
+                  type: string
+                  format: date-time
+                updated_at:
+                  type: string
+                  format: date-time
+
+    CollectionWithItems:
+      allOf:
+        - $ref: '#/components/schemas/Collection'
+        - type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/CollectionItemWithRecipe'
 
     Review:
       type: object
@@ -185,7 +235,7 @@ components:
         comment:
           type: string
           nullable: true
-          example: "Loved this recipe!"
+          example: Loved this recipe!
         created_at:
           type: string
           format: date-time
@@ -198,7 +248,7 @@ components:
       properties:
         error:
           type: string
-          example: "Not found"
+          example: Not found
 
     ValidationError:
       type: object
@@ -207,23 +257,253 @@ components:
           type: array
           items:
             type: string
-      example:
-        errors:
-          - "Title is required"
-          - "Description must be at least 10 characters"
+          example:
+            - Email is required
+            - Password must be between 8 and 64 characters long
 
 paths:
 
   ################################
-  # RECIPES
+  # AUTH
+  ################################
+  /auth/signup:
+    post:
+      summary: Create a new user account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                username:
+                  type: string
+                  minLength: 8
+                  maxLength: 32
+                password:
+                  type: string
+                  minLength: 8
+                  maxLength: 64
+              required: [email, username, password]
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSignupMessage'
+        '400':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '409':
+          description: Email or username already used
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+
+  /auth/login:
+    post:
+      summary: Log in and receive an access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: Either email or username is required.
+                username:
+                  type: string
+                  description: Either username or email is required.
+                password:
+                  type: string
+                  minLength: 8
+                  maxLength: 64
+              required: [password]
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+        '400':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Too many login attempts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Server error
+
+  ################################
+  # USERS
   ################################
 
+  /users/me:
+    get:
+      summary: Get my profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      summary: Update my profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                username:
+                  type: string
+                  minLength: 8
+                  maxLength: 32
+                password:
+                  type: string
+                  minLength: 8
+                  maxLength: 64
+              description: At least one of the fields is required.
+      responses:
+        '200':
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Email or username already used
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete my profile
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Profile deleted
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/{id}/role:
+    patch:
+      summary: Update a user's role (ADMIN only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  type: string
+                  enum: [USER, CREATOR, ADMIN]
+              required: [role]
+      responses:
+        '200':
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  ################################
+  # RECIPES
+  ################################
   /recipes:
     get:
       summary: List public recipes
-      description: >
-        Returns a paginated list of public recipes. Supports text search,
-        tag filtering, and minimum average rating.
       parameters:
         - in: query
           name: q
@@ -231,18 +511,6 @@ paths:
             type: string
           required: false
           description: Search term for recipe title.
-        - in: query
-          name: tag
-          schema:
-            type: string
-          required: false
-          description: Filter recipes that have the given tag.
-        - in: query
-          name: minRating
-          schema:
-            type: number
-          required: false
-          description: Minimum average rating to include.
         - in: query
           name: page
           schema:
@@ -289,8 +557,7 @@ paths:
 
     post:
       summary: Create a recipe
-      description: >
-        Create a new recipe. Only users with role CREATOR or ADMIN are allowed.
+      description: Requires role CREATOR or ADMIN.
       security:
         - bearerAuth: []
       requestBody:
@@ -302,46 +569,46 @@ paths:
               properties:
                 title:
                   type: string
+                  minLength: 3
+                  maxLength: 100
                 description:
                   type: string
-                  nullable: true
+                  minLength: 10
                 isPublic:
                   type: boolean
                   default: true
                 servings:
                   type: integer
-                  nullable: true
+                  minimum: 1
                 prepMinutes:
                   type: integer
-                  nullable: true
+                  minimum: 0
                 cookMinutes:
                   type: integer
-                  nullable: true
+                  minimum: 0
                 steps:
                   type: array
                   items:
                     $ref: '#/components/schemas/Step'
                 ingredients:
                   type: array
+                  description: Each ingredient must include name and unit.
                   items:
                     type: object
                     properties:
-                      ingredientId:
-                        type: integer
-                        nullable: true
                       name:
                         type: string
-                        nullable: true
-                      quantity:
-                        type: number
+                        minLength: 3
+                        maxLength: 100
                       unit:
                         type: string
+                        minLength: 1
+                    required: [name, unit]
                 tags:
                   type: array
                   items:
                     type: string
-              required:
-                - title
+              required: [title, description, servings, prepMinutes, cookMinutes, steps, ingredients, tags]
       responses:
         '201':
           description: Recipe created
@@ -359,6 +626,8 @@ paths:
           description: Unauthorized
         '403':
           description: Forbidden
+        '409':
+          description: Conflict
         '500':
           description: Server error
           content:
@@ -369,9 +638,7 @@ paths:
   /recipes/{id}:
     get:
       summary: Get recipe details
-      description: >
-        Returns recipe details including steps, ingredients, tags, and avgRating.
-        Non-public recipes are only visible to the owner or admins.
+      description: Returns recipe details including steps, ingredients, and tags. Non-public recipes return 404 to unauthenticated users.
       parameters:
         - in: path
           name: id
@@ -385,6 +652,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RecipeDetail'
+        '400':
+          description: Invalid id
         '404':
           description: Not found
           content:
@@ -396,9 +665,7 @@ paths:
 
     put:
       summary: Update recipe metadata
-      description: >
-        Update core fields of a recipe (title, description, visibility, servings, times).
-        Only the owner or admins can update.
+      description: Owner or ADMIN only.
       security:
         - bearerAuth: []
       parameters:
@@ -435,10 +702,6 @@ paths:
                 $ref: '#/components/schemas/RecipeSummary'
         '400':
           description: Invalid input
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
         '401':
           description: Unauthorized
         '403':
@@ -448,8 +711,7 @@ paths:
 
     delete:
       summary: Delete a recipe
-      description: >
-        Delete a recipe. Only the owner or admins can delete.
+      description: Owner or ADMIN only.
       security:
         - bearerAuth: []
       parameters:
@@ -461,18 +723,18 @@ paths:
       responses:
         '204':
           description: Deleted successfully
+        '400':
+          description: Invalid id
         '401':
           description: Unauthorized
         '403':
           description: Forbidden
         '404':
           description: Not found
-
   /recipes/{id}/visibility:
     put:
       summary: Set recipe visibility
-      description: >
-        Set the isPublic flag on a recipe. Only the owner or admins can update.
+      description: Owner or ADMIN only.
       security:
         - bearerAuth: []
       parameters:
@@ -490,8 +752,7 @@ paths:
               properties:
                 isPublic:
                   type: boolean
-              required:
-                - isPublic
+              required: [isPublic]
       responses:
         '200':
           description: Updated visibility
@@ -506,10 +767,6 @@ paths:
                     type: boolean
         '400':
           description: Invalid input
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
         '401':
           description: Unauthorized
         '403':
@@ -520,8 +777,7 @@ paths:
   /recipes/{id}/steps:
     post:
       summary: Replace all steps for a recipe
-      description: >
-        Replace all steps of a recipe in one request. Only the owner or admins can update.
+      description: Owner, CREATOR, or ADMIN only.
       security:
         - bearerAuth: []
       parameters:
@@ -541,8 +797,7 @@ paths:
                   type: array
                   items:
                     $ref: '#/components/schemas/Step'
-              required:
-                - steps
+              required: [steps]
       responses:
         '200':
           description: Updated list of steps
@@ -557,10 +812,6 @@ paths:
                       $ref: '#/components/schemas/Step'
         '400':
           description: Invalid input
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
         '401':
           description: Unauthorized
         '403':
@@ -571,9 +822,7 @@ paths:
   /recipes/{id}/ingredients:
     post:
       summary: Replace all ingredients for a recipe
-      description: >
-        Replace all ingredients of a recipe. Ingredients can be referenced by ID
-        or created by name. Only the owner or admins can update.
+      description: Owner, CREATOR, or ADMIN only.
       security:
         - bearerAuth: []
       parameters:
@@ -596,16 +845,14 @@ paths:
                     properties:
                       ingredientId:
                         type: integer
-                        nullable: true
+                        description: Optional existing ingredient id.
                       name:
                         type: string
-                        nullable: true
-                      quantity:
-                        type: number
+                        description: Optional ingredient name (required by service).
                       unit:
                         type: string
-              required:
-                - ingredients
+                    required: [unit]
+              required: [ingredients]
       responses:
         '200':
           description: Updated ingredient list
@@ -617,22 +864,9 @@ paths:
                   ingredients:
                     type: array
                     items:
-                      type: object
-                      properties:
-                        ingredientId:
-                          type: integer
-                        name:
-                          type: string
-                        quantity:
-                          type: number
-                        unit:
-                          type: string
+                      $ref: '#/components/schemas/RecipeIngredient'
         '400':
           description: Invalid input
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
         '401':
           description: Unauthorized
         '403':
@@ -643,12 +877,10 @@ paths:
   ################################
   # INGREDIENTS
   ################################
-
   /ingredients:
     get:
       summary: Search ingredients
-      description: >
-        Search ingredients by name. If no query is provided, returns up to 50 ingredients.
+      description: Search ingredients by name. If no query is provided, returns up to 50 ingredients.
       parameters:
         - in: query
           name: q
@@ -667,15 +899,10 @@ paths:
                   $ref: '#/components/schemas/Ingredient'
         '500':
           description: Server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
 
     post:
       summary: Create an ingredient
-      description: >
-        Create a new ingredient. Only users with role CREATOR or ADMIN can create ingredients.
+      description: CREATOR or ADMIN only.
       security:
         - bearerAuth: []
       requestBody:
@@ -687,7 +914,11 @@ paths:
               properties:
                 name:
                   type: string
-                  example: "sugar"
+                  example: sugar
+                unit:
+                  type: string
+                  nullable: true
+                  example: grams
               required:
                 - name
       responses:
@@ -698,11 +929,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Ingredient'
         '400':
-          description: name is required or invalid
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
+          description: name is required
         '401':
           description: Unauthorized
         '403':
@@ -728,6 +955,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Ingredient'
+        '400':
+          description: Invalid id
         '404':
           description: Not found
         '500':
@@ -735,8 +964,7 @@ paths:
 
     put:
       summary: Update an ingredient
-      description: >
-        Update an ingredient's name. ADMIN only.
+      description: ADMIN only.
       security:
         - bearerAuth: []
       parameters:
@@ -754,7 +982,10 @@ paths:
               properties:
                 name:
                   type: string
-                  example: "brown sugar"
+                  example: brown sugar
+                unit:
+                  type: string
+                  example: grams
               required:
                 - name
       responses:
@@ -765,11 +996,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Ingredient'
         '400':
-          description: name is required or invalid
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
+          description: name is required
         '401':
           description: Unauthorized
         '403':
@@ -783,8 +1010,7 @@ paths:
 
     delete:
       summary: Delete an ingredient
-      description: >
-        Delete an ingredient by ID. ADMIN only.
+      description: ADMIN only.
       security:
         - bearerAuth: []
       parameters:
@@ -808,13 +1034,10 @@ paths:
   ################################
   # COLLECTIONS + ITEMS
   ################################
-
   /collections:
     get:
       summary: List collections for the current user
-      description: >
-        Returns collections owned by the authenticated user.  
-        Admin users may optionally filter by ownerId query parameter.
+      description: Returns collections owned by the authenticated user. Admin users may optionally filter by ownerId query parameter.
       security:
         - bearerAuth: []
       parameters:
@@ -853,7 +1076,7 @@ paths:
               properties:
                 name:
                   type: string
-                  example: "Weeknight Dinners"
+                  example: Weeknight Dinners
               required:
                 - name
       responses:
@@ -865,10 +1088,6 @@ paths:
                 $ref: '#/components/schemas/Collection'
         '400':
           description: Invalid input
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
         '401':
           description: Unauthorized
         '500':
@@ -877,8 +1096,7 @@ paths:
   /collections/{id}:
     get:
       summary: Get a collection by ID
-      description: >
-        Returns a collection and its items if the current user is the owner or an admin.
+      description: Returns a collection and its items if the current user is the owner or an admin.
       security:
         - bearerAuth: []
       parameters:
@@ -894,18 +1112,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  collection_id:
-                    type: integer
-                  user_id:
-                    type: integer
-                  name:
-                    type: string
-                  items:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/CollectionItem'
+                $ref: '#/components/schemas/CollectionWithItems'
         '401':
           description: Unauthorized
         '403':
@@ -917,8 +1124,7 @@ paths:
 
     put:
       summary: Update a collection
-      description: >
-        Update a collection's name. Only the owner or an admin can update.
+      description: Update a collection's name. Only the owner or an admin can update.
       security:
         - bearerAuth: []
       parameters:
@@ -937,7 +1143,7 @@ paths:
               properties:
                 name:
                   type: string
-                  example: "Updated Collection Name"
+                  example: Updated Collection Name
       responses:
         '200':
           description: Updated collection
@@ -947,10 +1153,6 @@ paths:
                 $ref: '#/components/schemas/Collection'
         '400':
           description: Invalid input
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
         '401':
           description: Unauthorized
         '403':
@@ -962,8 +1164,7 @@ paths:
 
     delete:
       summary: Delete a collection
-      description: >
-        Delete a collection. Only the owner or an admin can delete.
+      description: Delete a collection. Only the owner or an admin can delete.
       security:
         - bearerAuth: []
       parameters:
@@ -988,8 +1189,7 @@ paths:
   /collections/{id}/items:
     post:
       summary: Add a recipe to a collection
-      description: >
-        Add a recipe to a collection owned by the current user (or any collection if admin).
+      description: Add a recipe to a collection owned by the current user (or any collection if admin).
       security:
         - bearerAuth: []
       parameters:
@@ -1006,16 +1206,15 @@ paths:
             schema:
               type: object
               properties:
-                recipe_id:
-                  type: string
-                  example: "rec_123"
-                  description: "Recipe ID in the format rec_#"
+                recipeId:
+                  type: integer
+                  example: 1
                 note:
                   type: string
                   nullable: true
-                  example: "Make this on Friday"
+                  example: Make this on Friday
               required:
-                - recipe_id
+                - recipeId
       responses:
         '201':
           description: Item added
@@ -1025,10 +1224,6 @@ paths:
                 $ref: '#/components/schemas/CollectionItem'
         '400':
           description: Invalid input
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
         '401':
           description: Unauthorized
         '403':
@@ -1043,8 +1238,7 @@ paths:
   /collections/{id}/items/{itemId}:
     delete:
       summary: Remove a recipe from a collection
-      description: >
-        Remove a recipe item from a collection. Only the owner or an admin can remove items.
+      description: Remove a recipe item from a collection. Only the owner or an admin can remove items.
       security:
         - bearerAuth: []
       parameters:
@@ -1073,16 +1267,12 @@ paths:
           description: Server error
 
   ################################
-  # REVIEWS (avgRating)
+  # REVIEWS
   ################################
-
   /recipes/{recipeId}/reviews:
     get:
       summary: List reviews for a recipe
-      description: >
-        Returns all reviews for the given recipe.
-      security:
-        - bearerAuth: []
+      description: Returns all reviews for the given recipe.
       parameters:
         - in: path
           name: recipeId
@@ -1104,9 +1294,7 @@ paths:
 
     post:
       summary: Create a review for a recipe
-      description: >
-        Create a review for the given recipe.  
-        Each user may leave at most one review per recipe. avgRating is updated automatically.
+      description: Authenticated users may leave one review per recipe.
       security:
         - bearerAuth: []
       parameters:
@@ -1131,7 +1319,7 @@ paths:
                 comment:
                   type: string
                   nullable: true
-                  example: "Pretty good overall"
+                  example: Pretty good overall
               required:
                 - rating
       responses:
@@ -1143,10 +1331,6 @@ paths:
                 $ref: '#/components/schemas/Review'
         '400':
           description: Invalid input
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
         '401':
           description: Unauthorized
         '404':
@@ -1159,9 +1343,7 @@ paths:
   /reviews/{id}:
     put:
       summary: Update a review
-      description: >
-        Update the rating and/or comment of an existing review.  
-        Only the review author or an admin can update. avgRating is updated automatically.
+      description: Only the review author or an admin can update.
       security:
         - bearerAuth: []
       parameters:
@@ -1186,7 +1368,7 @@ paths:
                 comment:
                   type: string
                   nullable: true
-                  example: "Changed my mind after making it again"
+                  example: Changed my mind after making it again
       responses:
         '200':
           description: Updated review
@@ -1196,10 +1378,6 @@ paths:
                 $ref: '#/components/schemas/Review'
         '400':
           description: Invalid input
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
         '401':
           description: Unauthorized
         '403':
@@ -1211,9 +1389,7 @@ paths:
 
     delete:
       summary: Delete a review
-      description: >
-        Delete a review. Only the review author or an admin can delete.
-        avgRating is updated automatically.
+      description: Delete a review. Only the review author or an admin can delete.
       security:
         - bearerAuth: []
       parameters:

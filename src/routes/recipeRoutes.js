@@ -1,23 +1,85 @@
-const express = require("express");
+import express from "express";
+import { authenticate } from "../middleware/auth.js";
+import { authorizeRoles } from '../middleware/authorizeRoles.js';
+import { authorizeOwnership } from '../middleware/authorizeOwnership.js';
+import recipeController from "../controllers/recipeController.js";
+
+
+import {
+  validateRecipeId,
+  validateCreateRecipe,
+  validateUpdateRecipe,
+  validateUpdateRecipeVisibility,
+  validateCreateIngredientsForRecipe,
+  validateCreateStepsForRecipe,
+} from "../middleware/recipeValidators.js";
+
 const router = express.Router();
-const { requireAuth } = require("../middleware/auth");
-const recipeController = require("../controllers/recipeController");
+const requireAuth = [authenticate, authorizeRoles("ADMIN", "CREATOR")];
 
 
 router.get("/", recipeController.listRecipes);
 
-router.get("/:id", recipeController.getRecipe);
 
-router.post("/", requireAuth, recipeController.createRecipe);
+router.get(
+  "/:id",
+  validateRecipeId,              
+  recipeController.getRecipe
+);
 
-router.put("/:id", requireAuth, recipeController.updateRecipe);
 
-router.delete("/:id", requireAuth, recipeController.deleteRecipe);
+router.post(
+  "/",
+  authenticate,
+  authorizeRoles('ADMIN', 'CREATOR'),
+  validateCreateRecipe,    
+  recipeController.createRecipe
+);
 
-router.put("/:id/visibility", requireAuth, recipeController.setVisibility);
 
-router.post("/:id/steps", requireAuth, recipeController.replaceSteps);
+router.put(
+  "/:id",
+  authenticate,
+  validateRecipeId,
+  validateUpdateRecipe,          
+  recipeController.updateRecipe
+);
 
-router.post("/:id/ingredients", requireAuth, recipeController.replaceIngredients);
 
-module.exports = router;
+router.delete(
+  "/:id",
+  authenticate,
+  validateRecipeId,
+  recipeController.deleteRecipe
+);
+
+
+router.put(
+  "/:id/visibility",
+  authenticate,
+  validateRecipeId,
+  validateUpdateRecipeVisibility, 
+  recipeController.setVisibility
+);
+
+
+router.post(
+  "/:id/steps",
+  requireAuth,
+  validateRecipeId,
+  validateCreateStepsForRecipe,  
+  recipeController.replaceSteps
+);
+
+
+router.post(
+  "/:id/ingredients",
+  requireAuth,
+  validateRecipeId,
+  validateCreateIngredientsForRecipe, // validates body.ingredients[*]
+  recipeController.replaceIngredients
+);
+
+export default router;
+
+

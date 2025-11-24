@@ -1,17 +1,48 @@
 import express from 'express';
+import { authenticate } from '../middleware/auth.js';
+
+import {
+  validateRecipeId,
+  validateReviewId,
+  validateCreateReview,
+  validateUpdateReview
+} from '../middleware/reviewValidators.js';
+
 import {
   listReviewsForRecipe,
   createReviewForRecipe,
   updateReview,
-  deleteReview,
+  deleteReview
 } from '../controllers/reviewController.js';
-import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.get('/recipes/:recipeId/reviews', listReviewsForRecipe);
-router.post('/recipes/:recipeId/reviews', requireAuth, createReviewForRecipe);
-router.put('/reviews/:id', requireAuth, updateReview);
-router.delete('/reviews/:id', requireAuth, deleteReview);
+router.get(
+  '/recipes/:recipeId/reviews',
+  validateRecipeId,
+  listReviewsForRecipe
+);
+
+router.post(
+  '/recipes/:recipeId/reviews',
+  authenticate,
+  validateCreateReview,
+  createReviewForRecipe
+);
+
+router.put(
+  '/reviews/:id',
+  authenticate,
+  validateReviewId,
+  validateUpdateReview,
+  updateReview
+);
+
+router.delete(
+  '/reviews/:id',
+  authenticate,
+  validateReviewId,
+  deleteReview
+);
 
 export default router;

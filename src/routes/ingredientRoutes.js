@@ -1,38 +1,57 @@
-const express = require("express");
+import express from "express";
+import { authenticate } from "../middleware/auth.js";
+import { authorizeRoles } from '../middleware/authorizeRoles.js';
+import ingredientController from "../controllers/ingredientController.js";
+
+import {
+  validateIngredientId,
+  validateIngredientQuery,
+  validateCreateIngredient,
+  validateUpdateIngredient,
+} from "../middleware/ingredientValidators.js"; 
+
 const router = express.Router();
-const { requireAuth, requireRole } = require("../middleware/auth");
-const ingredientController = require("../controllers/ingredientController");
-
-router.get("/", ingredientController.searchIngredients);
 
 
-router.get("/:id", ingredientController.getIngredient);
+router.get(
+  "/",
+  validateIngredientQuery,               
+  ingredientController.searchIngredients
+);
+
+
+router.get(
+  "/:id",
+  validateIngredientId,                  
+  ingredientController.getIngredient
+);
 
 
 router.post(
   "/",
-  requireAuth,
-  (req, res, next) => {
-    if (req.user.role === "CREATOR" || req.user.role === "ADMIN") return next();
-    return res.status(403).json({ error: "Forbidden" });
-  },
+  authenticate,                           
+  authorizeRoles('CREATOR', 'ADMIN'),
+  validateCreateIngredient,              
   ingredientController.createIngredient
 );
 
 
 router.put(
   "/:id",
-  requireAuth,
-  requireRole("ADMIN"),
+  authenticate,
+  authorizeRoles('ADMIN'),
+  validateIngredientId,
+  validateUpdateIngredient,
   ingredientController.updateIngredient
 );
 
 
 router.delete(
   "/:id",
-  requireAuth,
-  requireRole("ADMIN"),
+  authenticate,
+  authorizeRoles('ADMIN'),
+  validateIngredientId,
   ingredientController.deleteIngredient
 );
 
-module.exports = router;
+export default router;

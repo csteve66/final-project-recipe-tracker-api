@@ -1,4 +1,13 @@
 import express from 'express';
+import { authenticate } from '../middleware/auth.js';
+import {
+  validateCollectionId,
+  validateItemId,
+  validateCreateCollection,
+  validateUpdateCollection,
+  validateAddItemToCollection
+} from '../middleware/collectionValidators.js';
+
 import {
   listCollections,
   getCollection,
@@ -6,20 +15,23 @@ import {
   updateCollection,
   deleteCollection,
   addCollectionItem,
-  removeCollectionItem,
+  removeCollectionItem
 } from '../controllers/collectionController.js';
-import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.use(requireAuth);
+router.get('/', authenticate, listCollections);
 
-router.get('/', listCollections);
-router.get('/:id', getCollection);
-router.post('/', createCollection);
-router.put('/:id', updateCollection);
-router.delete('/:id', deleteCollection);
-router.post('/:id/items', addCollectionItem);
-router.delete('/:id/items/:itemId', removeCollectionItem);
+router.get('/:id', authenticate, validateCollectionId, getCollection);
+
+router.post('/', authenticate, validateCreateCollection, createCollection);
+
+router.put('/:id', authenticate, validateUpdateCollection, updateCollection);
+
+router.delete('/:id', authenticate, validateCollectionId, deleteCollection);
+
+router.post('/:id/items', authenticate, validateAddItemToCollection, addCollectionItem);
+
+router.delete('/:id/items/:itemId', authenticate, validateCollectionId, validateItemId, removeCollectionItem);
 
 export default router;
