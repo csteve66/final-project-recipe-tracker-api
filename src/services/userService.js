@@ -1,6 +1,10 @@
 import bcrypt from 'bcrypt';
 import { Prisma } from '../generated/prisma/index.js';
-import { updateProfile, removeProfile, updateRole } from '../repositories/userRepo';
+import { findMyProfile, updateProfile, removeProfile, updateRole } from '../repositories/userRepo';
+
+export async function getMyProfile(userid) {
+    return await findMyProfile(userid);
+}
 
 export async function updateMyProfile(userid, { username, email, password }) {
     const data = {}

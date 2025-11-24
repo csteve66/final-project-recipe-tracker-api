@@ -1,5 +1,17 @@
 import prisma from '../config/db.js';
 
+export async function findMyProfile(userid) {
+    return await prisma.user.findUnique({
+        where: { userid },
+        select: {
+            userid: true,
+            username: true,
+            email: true,
+            role: true
+        }
+    });
+}
+
 export async function createUser(data) {
     return await prisma.user.create({
         data: data,
