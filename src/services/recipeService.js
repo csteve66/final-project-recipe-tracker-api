@@ -71,7 +71,6 @@ export async function getRecipeService({ id, user }) {
 
   const ownerUserId = recipe.user_id;
   if (!recipe.is_public && !canModifyRecipe(user, ownerUserId)) {
-    // hide existence
     throw httpError(404, "Not found");
   }
 
@@ -291,21 +290,39 @@ export async function replaceIngredientsService({ id, user, ingredients }) {
 
   const ingredientIds = [];
   for (const i of ingredients || []) {
-    if (!i.name) {
-      throw httpError(400, "Each ingredient must have a name");
+    const hasId =
+      i.ingredientId !== undefined && i.ingredientId !== null && i.ingredientId !== "";
+    const hasName = !!i.name;
+
+    if (!hasId && !hasName) {
+      throw httpError(
+        400,
+        "Each ingredient must have either an ingredientId or a name"
+      );
     }
-    const ing = await ingredientService.resolveIngredientForRecipeService({
-      name: i.name,
-      unit: i.unit,
-    });
-    ingredientIds.push(ing.ingredient_id);
+
+    if (hasId && hasName) {
+      throw httpError(400, "Ingredient ID and name cannot both be provided");
+    }
+
+    if (hasId) {
+      const ingredientId = Number(i.ingredientId);
+      if (!Number.isInteger(ingredientId) || ingredientId < 1) {
+        throw httpError(400, "Ingredient ID must be a positive integer");
+      }
+      ingredientIds.push(ingredientId);
+    } else {
+      const ing = await ingredientService.resolveIngredientForRecipeService({
+        name: i.name,
+        unit: i.unit,
+      });
+      ingredientIds.push(ing.ingredient_id);
+    }
   }
 
   await recipeRepository.replaceRecipeIngredients(recipeId, ingredientIds);
 
-  const after = await recipeRepository.getRecipeIngredientsWithDetails(
-    recipeId
-  );
+  const after = await recipeRepository.getRecipeIngredientsWithDetails(recipeId);
 
   return {
     ingredients: after.recipeIngredients.map((ri) => ({

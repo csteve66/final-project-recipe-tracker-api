@@ -1,4 +1,4 @@
-import ingredientRepository from "../repositories/ingredientRepo.js";
+import ingredientRepository from "../repositories/ingredientRepository.js";
 
 function httpError(status, message) {
   const err = new Error(message);
@@ -6,90 +6,128 @@ function httpError(status, message) {
   return err;
 }
 
-export async function searchIngredientsService({ q }) {
-  const query = (q || "").toString().trim();
-  return ingredientRepository.searchByName(query, 50);
-}
-
-export async function getIngredientByIdService({ id }) {
-  const ingredientId = Number(id);
-  if (!Number.isInteger(ingredientId) || ingredientId < 1) {
+function parseIngredientId(ingredientId) {
+  const id = Number(ingredientId);
+  if (!Number.isInteger(id) || id < 1) {
     throw httpError(400, "Invalid ingredient id");
   }
+  return id;
+}
 
-  const ing = await ingredientRepository.findById(ingredientId);
-  if (!ing) throw httpError(404, "Not found");
+// GET /ingredients?q=
+export async function searchIngredientsService({ q }) {
+  const items = await ingredientRepository.searchByName(q);
+  return items;
+}
+
+// GET /ingredients/:id
+export async function getIngredientByIdService({ ingredientId }) {
+  const id = parseIngredientId(ingredientId);
+  const ing = await ingredientRepository.findById(id);
+
+  if (!ing) {
+    throw httpError(404, "Not found");
+  }
+
   return ing;
 }
 
+// POST /ingredients
 export async function createIngredientService({ name, unit }) {
-  if (!name) throw httpError(400, "name is required");
-
-  const normalizedName = String(name).trim().toLowerCase();
-  const normalizedUnit = unit ? String(unit).trim().toLowerCase() : null;
-
-  try {
-    const created = await ingredientRepository.create({
-      name: normalizedName,
-      unit: normalizedUnit,
-    });
-    return created;
-  } catch (e) {
-    if (e.code === "P2002") {
-      throw httpError(409, "Ingredient already exists");
-    }
-    throw e;
-  }
-}
-
-export async function updateIngredientService({ id, name, unit }) {
-  const ingredientId = Number(id);
-  if (!Number.isInteger(ingredientId) || ingredientId < 1) {
-    throw httpError(400, "Invalid ingredient id");
+  if (!name || typeof name !== "string") {
+    throw httpError(400, "Name is required");
   }
 
-  if (!name) throw httpError(400, "name is required");
-
-  const normalizedName = String(name).trim().toLowerCase();
-  const normalizedUnit = unit ? String(unit).trim().toLowerCase() : null;
-
-  try {
-    const updated = await ingredientRepository.update(ingredientId, {
-      name: normalizedName,
-      unit: normalizedUnit,
-    });
-    return updated;
-  } catch (e) {
-    if (e.code === "P2025") throw httpError(404, "Not found");
-    if (e.code === "P2002") throw httpError(409, "Duplicate name");
-    throw e;
-  }
-}
-
-export async function deleteIngredientService({ id }) {
-  const ingredientId = Number(id);
-  if (!Number.isInteger(ingredientId) || ingredientId < 1) {
-    throw httpError(400, "Invalid ingredient id");
+  const trimmedName = name.trim();
+  if (trimmedName.length < 3 || trimmedName.length > 100) {
+    throw httpError(400, "Name must be between 3 and 100 characters");
   }
 
-  try {
-    await ingredientRepository.deleteById(ingredientId);
-  } catch (e) {
-    if (e.code === "P2025") throw httpError(404, "Not found");
-    throw e;
-  }
-}
+  const trimmedUnit =
+    unit === undefined || unit === null ? null : String(unit).trim();
 
-export async function resolveIngredientForRecipeService({ name, unit }) {
-  const normalizedName = String(name).trim().toLowerCase();
-  const normalizedUnit = unit ? String(unit).trim().toLowerCase() : null;
-
-  const ing = await ingredientRepository.upsertByName({
-    name: normalizedName,
-    unit: normalizedUnit,
+  const created = await ingredientRepository.create({
+    name: trimmedName,
+    unit: trimmedUnit,
   });
 
-  return ing; 
+  return created;
+}
+
+// PUT /ingredients/:id
+export async function updateIngredientService({ ingredientId, name, unit }) {
+  const id = parseIngredientId(ingredientId);
+
+  const existing = await ingredientRepository.findById(id);
+  if (!existing) {
+    throw httpError(404, "Not found");
+  }
+
+  const data = {};
+
+  if (name !== undefined) {
+    const trimmedName = String(name).trim();
+    if (trimmedName.length < 3 || trimmedName.length > 100) {
+      throw httpError(400, "Name must be between 3 and 100 characters");
+    }
+    data.name = trimmedName;
+  }
+
+  if (unit !== undefined) {
+    data.unit =
+      unit === null || unit === ""
+        ? null
+        : String(unit).trim();
+  }
+
+  const updated = await ingredientRepository.update(id, data);
+
+  return updated;
+}
+
+// DELETE /ingredients/:id
+export async function deleteIngredientService({ ingredientId }) {
+  const id = parseIngredientId(ingredientId);
+
+  const existing = await ingredientRepository.findById(id);
+  if (!existing) {
+    throw httpError(404, "Not found");
+  }
+
+  await ingredientRepository.deleteById(id);
+}
+
+// Used by recipeService when creating / replacing recipe ingredients
+export async function resolveIngredientForRecipeService({
+  ingredientId,
+  name,
+  unit,
+}) {
+  // Case 1: use existing ingredient by numeric id
+  if (ingredientId !== undefined && ingredientId !== null && ingredientId !== "") {
+    const id = parseIngredientId(ingredientId);
+    const ing = await ingredientRepository.findById(id);
+    if (!ing) {
+      throw httpError(404, "Ingredient not found");
+    }
+    return ing;
+  }
+
+  // Case 2: create / upsert by name + unit
+  if (!name) {
+    throw httpError(400, "Ingredient name is required");
+  }
+
+  const trimmedName = String(name).trim();
+  const trimmedUnit =
+    unit === undefined || unit === null ? null : String(unit).trim();
+
+  const ing = await ingredientRepository.upsertByName({
+    name: trimmedName,
+    unit: trimmedUnit,
+  });
+
+  return ing;
 }
 
 const ingredientService = {

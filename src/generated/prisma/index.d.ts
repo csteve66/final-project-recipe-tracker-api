@@ -10866,55 +10866,71 @@ export namespace Prisma {
   }
 
   export type CollectionItemAvgAggregateOutputType = {
+    collection_item_id: number | null
     collection_id: number | null
     recipe_id: number | null
   }
 
   export type CollectionItemSumAggregateOutputType = {
+    collection_item_id: number | null
     collection_id: number | null
     recipe_id: number | null
   }
 
   export type CollectionItemMinAggregateOutputType = {
+    collection_item_id: number | null
     collection_id: number | null
     recipe_id: number | null
+    note: string | null
   }
 
   export type CollectionItemMaxAggregateOutputType = {
+    collection_item_id: number | null
     collection_id: number | null
     recipe_id: number | null
+    note: string | null
   }
 
   export type CollectionItemCountAggregateOutputType = {
+    collection_item_id: number
     collection_id: number
     recipe_id: number
+    note: number
     _all: number
   }
 
 
   export type CollectionItemAvgAggregateInputType = {
+    collection_item_id?: true
     collection_id?: true
     recipe_id?: true
   }
 
   export type CollectionItemSumAggregateInputType = {
+    collection_item_id?: true
     collection_id?: true
     recipe_id?: true
   }
 
   export type CollectionItemMinAggregateInputType = {
+    collection_item_id?: true
     collection_id?: true
     recipe_id?: true
+    note?: true
   }
 
   export type CollectionItemMaxAggregateInputType = {
+    collection_item_id?: true
     collection_id?: true
     recipe_id?: true
+    note?: true
   }
 
   export type CollectionItemCountAggregateInputType = {
+    collection_item_id?: true
     collection_id?: true
     recipe_id?: true
+    note?: true
     _all?: true
   }
 
@@ -11005,8 +11021,10 @@ export namespace Prisma {
   }
 
   export type CollectionItemGroupByOutputType = {
+    collection_item_id: number
     collection_id: number
     recipe_id: number
+    note: string | null
     _count: CollectionItemCountAggregateOutputType | null
     _avg: CollectionItemAvgAggregateOutputType | null
     _sum: CollectionItemSumAggregateOutputType | null
@@ -11029,32 +11047,40 @@ export namespace Prisma {
 
 
   export type CollectionItemSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    collection_item_id?: boolean
     collection_id?: boolean
     recipe_id?: boolean
+    note?: boolean
     collection?: boolean | CollectionDefaultArgs<ExtArgs>
     recipe?: boolean | RecipeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["collectionItem"]>
 
   export type CollectionItemSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    collection_item_id?: boolean
     collection_id?: boolean
     recipe_id?: boolean
+    note?: boolean
     collection?: boolean | CollectionDefaultArgs<ExtArgs>
     recipe?: boolean | RecipeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["collectionItem"]>
 
   export type CollectionItemSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    collection_item_id?: boolean
     collection_id?: boolean
     recipe_id?: boolean
+    note?: boolean
     collection?: boolean | CollectionDefaultArgs<ExtArgs>
     recipe?: boolean | RecipeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["collectionItem"]>
 
   export type CollectionItemSelectScalar = {
+    collection_item_id?: boolean
     collection_id?: boolean
     recipe_id?: boolean
+    note?: boolean
   }
 
-  export type CollectionItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"collection_id" | "recipe_id", ExtArgs["result"]["collectionItem"]>
+  export type CollectionItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"collection_item_id" | "collection_id" | "recipe_id" | "note", ExtArgs["result"]["collectionItem"]>
   export type CollectionItemInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     collection?: boolean | CollectionDefaultArgs<ExtArgs>
     recipe?: boolean | RecipeDefaultArgs<ExtArgs>
@@ -11075,8 +11101,10 @@ export namespace Prisma {
       recipe: Prisma.$RecipePayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
+      collection_item_id: number
       collection_id: number
       recipe_id: number
+      note: string | null
     }, ExtArgs["result"]["collectionItem"]>
     composites: {}
   }
@@ -11160,8 +11188,8 @@ export namespace Prisma {
      * // Get first 10 CollectionItems
      * const collectionItems = await prisma.collectionItem.findMany({ take: 10 })
      * 
-     * // Only select the `collection_id`
-     * const collectionItemWithCollection_idOnly = await prisma.collectionItem.findMany({ select: { collection_id: true } })
+     * // Only select the `collection_item_id`
+     * const collectionItemWithCollection_item_idOnly = await prisma.collectionItem.findMany({ select: { collection_item_id: true } })
      * 
      */
     findMany<T extends CollectionItemFindManyArgs>(args?: SelectSubset<T, CollectionItemFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CollectionItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -11205,9 +11233,9 @@ export namespace Prisma {
      *   ]
      * })
      * 
-     * // Create many CollectionItems and only return the `collection_id`
-     * const collectionItemWithCollection_idOnly = await prisma.collectionItem.createManyAndReturn({
-     *   select: { collection_id: true },
+     * // Create many CollectionItems and only return the `collection_item_id`
+     * const collectionItemWithCollection_item_idOnly = await prisma.collectionItem.createManyAndReturn({
+     *   select: { collection_item_id: true },
      *   data: [
      *     // ... provide data here
      *   ]
@@ -11296,9 +11324,9 @@ export namespace Prisma {
      *   ]
      * })
      * 
-     * // Update zero or more CollectionItems and only return the `collection_id`
-     * const collectionItemWithCollection_idOnly = await prisma.collectionItem.updateManyAndReturn({
-     *   select: { collection_id: true },
+     * // Update zero or more CollectionItems and only return the `collection_item_id`
+     * const collectionItemWithCollection_item_idOnly = await prisma.collectionItem.updateManyAndReturn({
+     *   select: { collection_item_id: true },
      *   where: {
      *     // ... provide filter here
      *   },
@@ -11502,8 +11530,10 @@ export namespace Prisma {
    * Fields of the CollectionItem model
    */
   interface CollectionItemFieldRefs {
+    readonly collection_item_id: FieldRef<"CollectionItem", 'Int'>
     readonly collection_id: FieldRef<"CollectionItem", 'Int'>
     readonly recipe_id: FieldRef<"CollectionItem", 'Int'>
+    readonly note: FieldRef<"CollectionItem", 'String'>
   }
     
 
@@ -13152,8 +13182,10 @@ export namespace Prisma {
 
 
   export const CollectionItemScalarFieldEnum: {
+    collection_item_id: 'collection_item_id',
     collection_id: 'collection_id',
-    recipe_id: 'recipe_id'
+    recipe_id: 'recipe_id',
+    note: 'note'
   };
 
   export type CollectionItemScalarFieldEnum = (typeof CollectionItemScalarFieldEnum)[keyof typeof CollectionItemScalarFieldEnum]
@@ -13354,13 +13386,13 @@ export namespace Prisma {
 
   export type IngredientWhereUniqueInput = Prisma.AtLeast<{
     ingredient_id?: number
+    name?: string
     AND?: IngredientWhereInput | IngredientWhereInput[]
     OR?: IngredientWhereInput[]
     NOT?: IngredientWhereInput | IngredientWhereInput[]
-    name?: StringFilter<"Ingredient"> | string
     unit?: StringNullableFilter<"Ingredient"> | string | null
     recipeIngredients?: RecipeIngredientListRelationFilter
-  }, "ingredient_id">
+  }, "ingredient_id" | "name">
 
   export type IngredientOrderByWithAggregationInput = {
     ingredient_id?: SortOrder
@@ -13724,33 +13756,40 @@ export namespace Prisma {
     AND?: CollectionItemWhereInput | CollectionItemWhereInput[]
     OR?: CollectionItemWhereInput[]
     NOT?: CollectionItemWhereInput | CollectionItemWhereInput[]
+    collection_item_id?: IntFilter<"CollectionItem"> | number
     collection_id?: IntFilter<"CollectionItem"> | number
     recipe_id?: IntFilter<"CollectionItem"> | number
+    note?: StringNullableFilter<"CollectionItem"> | string | null
     collection?: XOR<CollectionScalarRelationFilter, CollectionWhereInput>
     recipe?: XOR<RecipeScalarRelationFilter, RecipeWhereInput>
   }
 
   export type CollectionItemOrderByWithRelationInput = {
+    collection_item_id?: SortOrder
     collection_id?: SortOrder
     recipe_id?: SortOrder
+    note?: SortOrderInput | SortOrder
     collection?: CollectionOrderByWithRelationInput
     recipe?: RecipeOrderByWithRelationInput
   }
 
   export type CollectionItemWhereUniqueInput = Prisma.AtLeast<{
-    collection_id_recipe_id?: CollectionItemCollection_idRecipe_idCompoundUniqueInput
+    collection_item_id?: number
     AND?: CollectionItemWhereInput | CollectionItemWhereInput[]
     OR?: CollectionItemWhereInput[]
     NOT?: CollectionItemWhereInput | CollectionItemWhereInput[]
     collection_id?: IntFilter<"CollectionItem"> | number
     recipe_id?: IntFilter<"CollectionItem"> | number
+    note?: StringNullableFilter<"CollectionItem"> | string | null
     collection?: XOR<CollectionScalarRelationFilter, CollectionWhereInput>
     recipe?: XOR<RecipeScalarRelationFilter, RecipeWhereInput>
-  }, "collection_id_recipe_id">
+  }, "collection_item_id">
 
   export type CollectionItemOrderByWithAggregationInput = {
+    collection_item_id?: SortOrder
     collection_id?: SortOrder
     recipe_id?: SortOrder
+    note?: SortOrderInput | SortOrder
     _count?: CollectionItemCountOrderByAggregateInput
     _avg?: CollectionItemAvgOrderByAggregateInput
     _max?: CollectionItemMaxOrderByAggregateInput
@@ -13762,8 +13801,10 @@ export namespace Prisma {
     AND?: CollectionItemScalarWhereWithAggregatesInput | CollectionItemScalarWhereWithAggregatesInput[]
     OR?: CollectionItemScalarWhereWithAggregatesInput[]
     NOT?: CollectionItemScalarWhereWithAggregatesInput | CollectionItemScalarWhereWithAggregatesInput[]
+    collection_item_id?: IntWithAggregatesFilter<"CollectionItem"> | number
     collection_id?: IntWithAggregatesFilter<"CollectionItem"> | number
     recipe_id?: IntWithAggregatesFilter<"CollectionItem"> | number
+    note?: StringNullableWithAggregatesFilter<"CollectionItem"> | string | null
   }
 
   export type ReviewWhereInput = {
@@ -14257,37 +14298,47 @@ export namespace Prisma {
   }
 
   export type CollectionItemCreateInput = {
+    note?: string | null
     collection: CollectionCreateNestedOneWithoutItemsInput
     recipe: RecipeCreateNestedOneWithoutCollectionItemsInput
   }
 
   export type CollectionItemUncheckedCreateInput = {
+    collection_item_id?: number
     collection_id: number
     recipe_id: number
+    note?: string | null
   }
 
   export type CollectionItemUpdateInput = {
+    note?: NullableStringFieldUpdateOperationsInput | string | null
     collection?: CollectionUpdateOneRequiredWithoutItemsNestedInput
     recipe?: RecipeUpdateOneRequiredWithoutCollectionItemsNestedInput
   }
 
   export type CollectionItemUncheckedUpdateInput = {
+    collection_item_id?: IntFieldUpdateOperationsInput | number
     collection_id?: IntFieldUpdateOperationsInput | number
     recipe_id?: IntFieldUpdateOperationsInput | number
+    note?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type CollectionItemCreateManyInput = {
+    collection_item_id?: number
     collection_id: number
     recipe_id: number
+    note?: string | null
   }
 
   export type CollectionItemUpdateManyMutationInput = {
-
+    note?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type CollectionItemUncheckedUpdateManyInput = {
+    collection_item_id?: IntFieldUpdateOperationsInput | number
     collection_id?: IntFieldUpdateOperationsInput | number
     recipe_id?: IntFieldUpdateOperationsInput | number
+    note?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ReviewCreateInput = {
@@ -14905,32 +14956,35 @@ export namespace Prisma {
     isNot?: CollectionWhereInput
   }
 
-  export type CollectionItemCollection_idRecipe_idCompoundUniqueInput = {
-    collection_id: number
-    recipe_id: number
-  }
-
   export type CollectionItemCountOrderByAggregateInput = {
+    collection_item_id?: SortOrder
     collection_id?: SortOrder
     recipe_id?: SortOrder
+    note?: SortOrder
   }
 
   export type CollectionItemAvgOrderByAggregateInput = {
+    collection_item_id?: SortOrder
     collection_id?: SortOrder
     recipe_id?: SortOrder
   }
 
   export type CollectionItemMaxOrderByAggregateInput = {
+    collection_item_id?: SortOrder
     collection_id?: SortOrder
     recipe_id?: SortOrder
+    note?: SortOrder
   }
 
   export type CollectionItemMinOrderByAggregateInput = {
+    collection_item_id?: SortOrder
     collection_id?: SortOrder
     recipe_id?: SortOrder
+    note?: SortOrder
   }
 
   export type CollectionItemSumOrderByAggregateInput = {
+    collection_item_id?: SortOrder
     collection_id?: SortOrder
     recipe_id?: SortOrder
   }
@@ -16160,11 +16214,14 @@ export namespace Prisma {
   }
 
   export type CollectionItemCreateWithoutRecipeInput = {
+    note?: string | null
     collection: CollectionCreateNestedOneWithoutItemsInput
   }
 
   export type CollectionItemUncheckedCreateWithoutRecipeInput = {
+    collection_item_id?: number
     collection_id: number
+    note?: string | null
   }
 
   export type CollectionItemCreateOrConnectWithoutRecipeInput = {
@@ -16311,8 +16368,10 @@ export namespace Prisma {
     AND?: CollectionItemScalarWhereInput | CollectionItemScalarWhereInput[]
     OR?: CollectionItemScalarWhereInput[]
     NOT?: CollectionItemScalarWhereInput | CollectionItemScalarWhereInput[]
+    collection_item_id?: IntFilter<"CollectionItem"> | number
     collection_id?: IntFilter<"CollectionItem"> | number
     recipe_id?: IntFilter<"CollectionItem"> | number
+    note?: StringNullableFilter<"CollectionItem"> | string | null
   }
 
   export type RecipeCreateWithoutRecipeIngredientsInput = {
@@ -16706,11 +16765,14 @@ export namespace Prisma {
   }
 
   export type CollectionItemCreateWithoutCollectionInput = {
+    note?: string | null
     recipe: RecipeCreateNestedOneWithoutCollectionItemsInput
   }
 
   export type CollectionItemUncheckedCreateWithoutCollectionInput = {
+    collection_item_id?: number
     recipe_id: number
+    note?: string | null
   }
 
   export type CollectionItemCreateOrConnectWithoutCollectionInput = {
@@ -17196,7 +17258,9 @@ export namespace Prisma {
   }
 
   export type CollectionItemCreateManyRecipeInput = {
+    collection_item_id?: number
     collection_id: number
+    note?: string | null
   }
 
   export type StepUpdateWithoutRecipeInput = {
@@ -17267,15 +17331,20 @@ export namespace Prisma {
   }
 
   export type CollectionItemUpdateWithoutRecipeInput = {
+    note?: NullableStringFieldUpdateOperationsInput | string | null
     collection?: CollectionUpdateOneRequiredWithoutItemsNestedInput
   }
 
   export type CollectionItemUncheckedUpdateWithoutRecipeInput = {
+    collection_item_id?: IntFieldUpdateOperationsInput | number
     collection_id?: IntFieldUpdateOperationsInput | number
+    note?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type CollectionItemUncheckedUpdateManyWithoutRecipeInput = {
+    collection_item_id?: IntFieldUpdateOperationsInput | number
     collection_id?: IntFieldUpdateOperationsInput | number
+    note?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type RecipeTagCreateManyTagInput = {
@@ -17295,19 +17364,26 @@ export namespace Prisma {
   }
 
   export type CollectionItemCreateManyCollectionInput = {
+    collection_item_id?: number
     recipe_id: number
+    note?: string | null
   }
 
   export type CollectionItemUpdateWithoutCollectionInput = {
+    note?: NullableStringFieldUpdateOperationsInput | string | null
     recipe?: RecipeUpdateOneRequiredWithoutCollectionItemsNestedInput
   }
 
   export type CollectionItemUncheckedUpdateWithoutCollectionInput = {
+    collection_item_id?: IntFieldUpdateOperationsInput | number
     recipe_id?: IntFieldUpdateOperationsInput | number
+    note?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type CollectionItemUncheckedUpdateManyWithoutCollectionInput = {
+    collection_item_id?: IntFieldUpdateOperationsInput | number
     recipe_id?: IntFieldUpdateOperationsInput | number
+    note?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
 

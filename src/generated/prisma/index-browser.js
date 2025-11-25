@@ -178,8 +178,10 @@ exports.Prisma.CollectionScalarFieldEnum = {
 };
 
 exports.Prisma.CollectionItemScalarFieldEnum = {
+  collection_item_id: 'collection_item_id',
   collection_id: 'collection_id',
-  recipe_id: 'recipe_id'
+  recipe_id: 'recipe_id',
+  note: 'note'
 };
 
 exports.Prisma.ReviewScalarFieldEnum = {

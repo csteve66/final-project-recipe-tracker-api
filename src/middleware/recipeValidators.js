@@ -1,6 +1,6 @@
 import { param, body, oneOf } from 'express-validator';
 import handleValidationErrors from './handleValidationErrors.js';
-import { exists } from '../repositories/ingredientRepo.js';
+import { exists } from '../repositories/ingredientRepository.js';
 
 export const validateRecipeId = [
     param('id')
@@ -42,13 +42,13 @@ export const validateCreateRecipe = [
         .exists({ values: 'falsy' })
         .withMessage('Servings is required')
         .bail()
-        .isInt({ min: 1})
+        .isInt({ min: 1 })
         .withMessage('Servings must be a postitive integer'),
     body('prepMinutes')
         .exists({ values: 'falsy' })
         .withMessage('prepMinutes is required')
         .bail()
-        .isInt({ min: 0})
+        .isInt({ min: 0 })
         .withMessage('prepMinutes must be a non-negative integer'),
     body('cookMinutes')
         .exists({ values: 'falsy' })
@@ -82,19 +82,19 @@ export const validateCreateRecipe = [
         .escape(),
     body('ingredients')
         .exists({ values: 'falsy' })
-        .withMessage('Ingredient are required')    
+        .withMessage('Ingredient are required')
         .bail()
         .isArray({ min: 1 })
         .withMessage('Ingredients must be a non-empty array'),
     body('ingredients.*.name')
-        .exists({ values: 'falsy'})
+        .exists({ values: 'falsy' })
         .withMessage('Ingredients name is required')
         .bail()
         .trim()
         .isString()
         .withMessage('Ingredients name must be a string')
         .bail()
-        .isLength( { min: 3, max: 100 })
+        .isLength({ min: 3, max: 100 })
         .withMessage('Ingredients name must be between 3 and 100 characters')
         .bail()
         .escape(),
@@ -106,7 +106,7 @@ export const validateCreateRecipe = [
         .isString()
         .withMessage('Ingredients unit must be a string')
         .bail()
-        .isLength( { min: 1 })
+        .isLength({ min: 1 })
         .withMessage('Ingredients unit must be at least 1 character')
         .bail()
         .escape(),
@@ -131,11 +131,11 @@ export const validateCreateRecipe = [
 export const validateUpdateRecipe = [
     oneOf(
         [
-        body('title')
-            .exists({ values: 'falsy' }),
-        body('isPublic')
-            .exists({ values: 'falsy' })
-        ], 
+            body('title')
+                .exists({ values: 'falsy' }),
+            body('isPublic')
+                .exists({ values: 'falsy' })
+        ],
         {
             message: 'At least one field (title, isPublic) must be provided'
         }
@@ -146,7 +146,7 @@ export const validateUpdateRecipe = [
         .isString()
         .withMessage('Title must be a string')
         .bail()
-        .isLength({ min: 3, max: 100})
+        .isLength({ min: 3, max: 100 })
         .withMessage('Title must be between 3 and 100 characters')
         .bail()
         .escape(),
@@ -176,7 +176,7 @@ export const validateCreateIngredientsForRecipe = [
         .withMessage('Ingredients must be a non-empty array'),
     body('ingredients.*')
         .custom((ingredient) => {
-            const hasId = !!ingredient.ingredientId;
+            const hasId = ingredient.ingredientId !== undefined && ingredient.ingredientId !== null;
             const hasName = !!ingredient.name;
 
             if (!hasId && !hasName) {
@@ -190,14 +190,10 @@ export const validateCreateIngredientsForRecipe = [
         }),
     body('ingredients.*.ingredientId')
         .optional()
-        .trim()
-        .isString()
-        .withMessage('Ingredient ID must be a string')
+        .isInt({ min: 1 })
+        .withMessage('Ingredient ID must be a positive integer')
         .bail()
-        .matches(/^ing_\d+$/)
-        .withMessage('Ingredient ID must follow format ing_#')
-        .bail()
-        .custom(async(value) => {
+        .custom(async (value) => {
             if (value && !(await exists(value))) {
                 throw new Error(`Invalid ingredientId: ${value}`);
             }

@@ -20,6 +20,13 @@ export async function searchByName(q, limit = 50) {
   });
 }
 
+export async function exists(id) {
+  const ingredient = await prisma.ingredient.findUnique({
+    where: { ingredient_id: Number(id) },
+  });
+  return !!ingredient;
+}
+
 export async function findById(ingredientId) {
   return prisma.ingredient.findUnique({
     where: { ingredient_id: ingredientId },
@@ -65,6 +72,7 @@ const ingredientRepository = {
   update,
   deleteById,
   upsertByName,
+  exists,
 };
 
 export default ingredientRepository;
